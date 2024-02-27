@@ -1,0 +1,32 @@
+
+//ReadToEnd() read file and store content in a string
+try
+{
+    var fileReader = new StreamReader(fileName);
+    Console.WriteLine(fileReader.ReadToEnd().Trim()); 
+
+}
+catch (FileNotFoundException)
+{
+   Console.WriteLine("Sorry, that file was not found.");
+}
+
+
+//File.ReadAllLines(fileName) reads all lines from the specified file and returns them as an array of strings.
+try
+{
+ 
+    // AddRange: List method for adding multiple elements at once to a List<T> from retrieveable collections
+    List<string> fileList = [];
+    fileList.AddRange(File.ReadAllLines(fileName)); 
+    
+    // list-->array: 直接在list constructor里放一个array
+    var fileList = new List<string>(File.ReadAllLines(fileName)); 
+    Console.WriteLine(String.Join("\n", fileList));
+
+}
+catch (System.Exception)
+{
+    
+    Console.WriteLine("Sorry, that file was not found.");
+}
