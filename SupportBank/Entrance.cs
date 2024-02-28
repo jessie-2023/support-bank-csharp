@@ -17,7 +17,7 @@ public class Entrance(ILogger<Entrance> logger) // alternative way: primary cons
         using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
         var records = csvReader.GetRecords<RawFile>().ToList();
 
-        var bank = new Bank(_logger);
+        var bank = new Bank(_logger) {transactions = []};
         foreach (var record in records)
         {
             bank.NewTransaction(
@@ -36,26 +36,44 @@ public class Entrance(ILogger<Entrance> logger) // alternative way: primary cons
         {
             Console.WriteLine("*****");
             Console.WriteLine("[1] List all transactions");
-            Console.WriteLine("[2] List account transactions");
-            Console.WriteLine("[3] Check account balance");
+            Console.WriteLine("[2] List account details");
+            Console.WriteLine("[3] List account summary");
             Console.Write($"Enter the number of the action would like to take: ");
             var action = Console.ReadLine() ?? "";
             switch (action)
             {
                 case "1":
-                    bank.ListAllBalance();
+                    bank.ListAll();
                     break;
 
                 case "2":
                     Console.Write($"To list account details, enter the name of the account: ");
-                    var accountName = Console.ReadLine() ?? "";
-                    bank.ListDetailByName(accountName);
+                    var detailName = Console.ReadLine() ?? "";
+                    var detailAccount = bank.GetAccountByName(detailName, false);
+                    if (detailAccount != null)
+                    {
+                        detailAccount.ListDetail();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{detailName} has no account in this bank.");
+                    }
+                     _logger.LogInformation($"No account found for {detailName}.");
                     break;
 
                 case "3":
-                    Console.Write($"To check account balance, enter the name of the account: ");
-                    var balanceName = Console.ReadLine() ?? "";
-                    bank.CheckBalance(balanceName);
+                    Console.Write($"To check account summary, enter the name of the account: ");
+                    var summaryName = Console.ReadLine() ?? "";
+                    var summaryAccount = bank.GetAccountByName(summaryName, false);
+                    if (summaryAccount != null)
+                    {
+                        summaryAccount.ListSummary();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{summaryName} has no account in this bank.");
+                    }
+                     _logger.LogInformation($"No account found for {summaryName}.");
                     break;
 
                 default:
