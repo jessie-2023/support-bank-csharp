@@ -1,8 +1,47 @@
+using System.Globalization;
+using CsvHelper;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
 
-//ReadToEnd() read file and store content in a string
+
+// using var streamReader = new StreamReader("Transactions2014.csv");
+using var streamReader = new StreamReader("DodgyTransactions2015.csv");
+using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
+var records = csvReader.GetRecords<RawFile>(); //IEnumerable<RawFile>. It represents a sequence of objects of type RawFile, where each object corresponds to a record read from the CSV file.
+
+Console.WriteLine(string.Join("\n", records));
+
+//@0226=========================================================
+// var fileName = "Transactions2014.csv";
+var fileName = "DodgyTransactions2015.csv";
+// read file & add all the transactions to a list
+var fileList = new List<string>(File.ReadAllLines(fileName));
+
+// Console.WriteLine(String.Join("-", fileList[0].Split(",")));
+
+var bank = new Bank();
+for (int i = 1; i < fileList.Count; i++)
+{
+    string[] transaction = fileList[i].Split(",");
+    bank.NewTransaction(
+        transaction[0],
+        transaction[1],
+        transaction[2],
+        transaction[3],
+        decimal.Parse(transaction[4])
+    );
+}
+
+bank.ListDetailByName("Ben B");
+// bank.CheckBalance("Ben B");
+// bank.ListAllBalance();
+
+
+//ReadToEnd() read file and store content in a string========================
 try
 {
-    var fileReader = new StreamReader(fileName);
+    using var fileReader = new StreamReader(fileName);
     Console.WriteLine(fileReader.ReadToEnd().Trim()); 
 
 }

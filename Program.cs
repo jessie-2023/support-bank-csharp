@@ -1,33 +1,16 @@
-﻿using SupportBank.SupportBank;
+﻿using SupportBank.SupportBank; 
+using Microsoft.Extensions.DependencyInjection; // ServiceCollection()
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
-var fileName = "Transactions2014.csv";
-// read file & add all the transactions to a list
-var fileList = new List<string>(File.ReadAllLines(fileName));
+var servicesProvider = new ServiceCollection() // from Microsoft.Extensions.DependencyInjection
+    .AddTransient<Entrance>() // Adds a transient dependency for the Bank class. Transient means a new instance will be created every time it's requested
+    .AddLogging(loggingBuilder => // Configures logging services
+    {
+        loggingBuilder.ClearProviders(); // Clears any existing logging providers (useful when you want to replace the default providers)
+        loggingBuilder.AddNLog(); // Adds NLog as a logging provider
+    })
+    .BuildServiceProvider(); // Constructs a service provider based on the configured services
 
-// Console.WriteLine(String.Join("-", fileList[0].Split(",")));
-
-var bank = new Bank();
-for (int i = 1; i < fileList.Count; i++)
-{
-    string[] transaction = fileList[i].Split(",");
-    bank.NewTransaction(
-        transaction[0],
-        transaction[1],
-        transaction[2],
-        transaction[3],
-        decimal.Parse(transaction[4])
-    );
-}
-
-bank.ListDetailByName("Ben B");
-// bank.CheckBalance("Ben B");
-// bank.ListAllBalance();
-
-// creates an account for each person & keeps track of how much each person owes / is owed.
-
-
-
-// List All - prints out the names of each person, along with the total amount they owe or are owed, as before
-
-// List [Account] - prints out every transaction (with date, narrative, to and amount) for the specific account the user asks for.
-
+var entrance = servicesProvider.GetRequiredService<Entrance>(); // Retrieves an instance of the App class from the service provider
+entrance.Run(); // Calls the Run method on the App instance, presumably initiating your application logic

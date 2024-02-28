@@ -1,13 +1,19 @@
-using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
+using NLog;
 
 namespace SupportBank.SupportBank;
 
 public class Bank
 {
+    private readonly ILogger<Entrance> _logger;
     private readonly HashSet<Account> _accounts = [];
     private readonly Dictionary<string, Account> _accountRegister = [];
     private readonly HashSet<Transaction> _transactions = [];
 
+    public Bank(ILogger<Entrance> logger)
+    {
+        _logger = logger;
+    }
     public Account OpenAccount(string name)
     {
         var newAccount = new Account
@@ -17,23 +23,38 @@ public class Bank
         };
         _accounts.Add(newAccount);
         _accountRegister.Add(name, newAccount);
-        Console.WriteLine($"{name} is opening a new account.");
+        _logger.LogInformation($"{name} is opening a new account.");
         return newAccount;
     }
     public Account GetAccountByName(string name)
     {
         return _accountRegister.ContainsKey(name) ? _accountRegister[name] : OpenAccount(name);
     }
-    public void NewTransaction(string date, string from, string to, string narrative, decimal amount)
+
+    public void NewTransaction(string date, string from, string to, string narrative, string amount)
     {
         var newTransaction = new Transaction
         {
             Date = date,
             From = GetAccountByName(from),
             To = GetAccountByName(to),
-            Narrative = narrative,
-            Amount = amount
+            Narrative = narrative
         };
+
+        try
+        {
+            newTransaction.Amount = decimal.Parse(amount); // error handling, _logger
+        }
+        catch (FormatException exception)
+        {
+            
+            _logger.LogError(
+                "Transaction failed to register: Invalid format for amount: {0}, from {1} to {2} in {3} ", 
+                amount, from, to, date
+            );
+            _logger.LogDebug(exception.StackTrace);
+        }
+
         _transactions.Add(newTransaction);
     }
 

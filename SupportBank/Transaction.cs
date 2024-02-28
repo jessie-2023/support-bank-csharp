@@ -6,6 +6,6 @@ public class Transaction
     public required Account From {get; init; }
     public required Account To {get; init; }
     public required string Narrative { get; init; }
-    public required decimal Amount { get; init; }
+    public decimal Amount { get; set; } //cannot init for error handling
 
 }
